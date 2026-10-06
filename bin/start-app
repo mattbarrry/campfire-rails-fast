@@ -1,0 +1,18 @@
+#!/bin/bash -e
+
+# Fewer, cheaper GCs: requests allocate a lot of short-lived objects.
+export RUBY_JIT=${RUBY_JIT:-yjit}
+case "$RUBY_JIT" in
+  yjit) export RUBY_YJIT_ENABLE=1 ;;
+  zjit) export RUBY_YJIT_ENABLE=0 ;;
+  *)    export RUBY_YJIT_ENABLE=0 ;;
+esac
+export RUBY_GC_HEAP_INIT_SLOTS=${RUBY_GC_HEAP_INIT_SLOTS:-2000000}
+export RUBY_GC_MALLOC_LIMIT=${RUBY_GC_MALLOC_LIMIT:-128000000}
+export RUBY_GC_MALLOC_LIMIT_MAX=${RUBY_GC_MALLOC_LIMIT_MAX:-256000000}
+export RUBY_GC_OLDMALLOC_LIMIT=${RUBY_GC_OLDMALLOC_LIMIT:-128000000}
+export RUBY_GC_HEAP_FREE_SLOTS_MIN_RATIO=${RUBY_GC_HEAP_FREE_SLOTS_MIN_RATIO:-0.40}
+
+rm -f tmp/pids/server.pid
+./bin/rails db:prepare
+./bin/rails server

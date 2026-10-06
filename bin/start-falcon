@@ -1,0 +1,7 @@
+#!/bin/bash -e
+# Falcon (fiber per request) instead of Puma. Same GC/YJIT settings as bin/start-app.
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES FALCON=1 RUBY_YJIT_ENABLE=${RUBY_YJIT_ENABLE:-1} RUBY_GC_HEAP_INIT_SLOTS=${RUBY_GC_HEAP_INIT_SLOTS:-2000000} \
+  RUBY_GC_MALLOC_LIMIT=${RUBY_GC_MALLOC_LIMIT:-128000000} RUBY_GC_MALLOC_LIMIT_MAX=${RUBY_GC_MALLOC_LIMIT_MAX:-256000000} \
+  RUBY_GC_OLDMALLOC_LIMIT=${RUBY_GC_OLDMALLOC_LIMIT:-128000000}
+./bin/rails db:prepare
+exec bundle exec falcon serve --bind "http://0.0.0.0:${PORT:-3000}" --count "${WEB_CONCURRENCY:-4}"
